@@ -1,37 +1,39 @@
 import constants
 import telebot
-import requests
-import currency
-import weather
+import openai
 from telebot import types
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+openai.api_key = constants.openai
 
 bot = telebot.TeleBot(constants.token)
-response = requests.get(constants.url).json()
 
-markup = types.ReplyKeyboardMarkup(True, True)
 
-btn_currency = types.KeyboardButton('Курсы валют')
-btn_weather = types.KeyboardButton('Погода')
+def handle_message(update, context):
+    # Get the user's message
+    message = update.message.text
 
-markup.add(btn_currency, btn_weather)
+    # Use the OpenAI API to generate a response
+    response = openai.Completion.create(
+        engine="text-davinci-002",
+        prompt=f"User: {message}\nBot:",
+        max_tokens=1024,
+        temperature=0.5,
+        top_p=1.0,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
 
-@bot.message_handler(commands=['start'])
-def start_message(message):
-    bot.send_message(message.chat.id, 'Привет, чем я могу помочь?', reply_markup=markup)
+    # Extract the generated response from the API response
+    response_text = response["choices"][0]["text"]
 
-@bot.message_handler(func=lambda message: True)
-def send_welcome(message):
-    if message.text == 'Курсы валют':
-        menu = types.ReplyKeyboardMarkup(True, True)
-        btn_usd = types.KeyboardButton('USD')
-        btn_eur = types.KeyboardButton('EUR')
-        btn_rur = types.KeyboardButton('RUR')
-        menu.add(btn_usd, btn_eur, btn_rur)
-        msg = bot.send_message(message.chat.id, "Узнать наличный курс ПриватБанка", reply_markup=menu)
-        bot.register_next_step_handler(msg, currency.process_coin_step)
-    elif message.text == 'Погода':
-        city = bot.send_message(message.chat.id, "Какой город Вас интересует?")
-        bot.register_next_step_handler(city, weather.weather)
+    # Send the response to the user
+    bot.send_message(chat_id=update.message.chat_id, text=response_text)
 
-if __name__ == '__main__':
-    bot.polling(none_stop=True)
+
+# Set up the bot to listen for user messages
+updater = Updater(bot.token, use_context=True)
+updater.dispatcher.add_handler(MessageHandler(Filters.text, handle_message))
+
+# Start the bot
+updater.start_polling()
