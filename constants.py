@@ -1,2 +1,2 @@
-token = "790065450:AAFBF2glWPz6qXNHkydfQHYwvXxSijlrIGY"
-openai = "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"
+token = "790065450:AAGH-yagjgktsIgz9gKW9aDxjGG-UQxzunE"
+openai = "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"
