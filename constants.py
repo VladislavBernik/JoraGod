@@ -1,3 +1,2 @@
-token = "790065450:AAFBF2glWPz6qXNHkydfQHYwvXxSijlrIGY"
-url = 'https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5'
-OWMKEY = "999418815d68730b39a0858a86523528"
+token = "5651587902:AAFOSYGjIZzGd3xjvy1DxVG7psoHmcevyPw"
+openai = "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"
